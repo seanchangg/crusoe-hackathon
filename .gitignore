@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.vercel/
+out/
+.pytest_cache/
+.vercel
+.env*
+.env.vercel
+.env.lambda
+docs/recorded/session.mp4
+docs/recorded_deploy/session.mp4
+docs/recorded_slack/session.mp4
+docs/recorded_slack2/session.mp4
+docs/recorded_slack3/session.mp4

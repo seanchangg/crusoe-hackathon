@@ -1,0 +1,308 @@
+{
+  "job_id": "be90c404",
+  "phase": "done",
+  "round": 6,
+  "max_rounds": 6,
+  "score": 0.909,
+  "history": [
+    {
+      "round": 1,
+      "score": 0.455,
+      "decision": "continue",
+      "failed": [
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10"
+      ],
+      "seconds": 63.9,
+      "similarity": null,
+      "reason": "first round"
+    },
+    {
+      "round": 2,
+      "score": 0.455,
+      "decision": "replan",
+      "failed": [
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10"
+      ],
+      "seconds": 53.4,
+      "similarity": 1.0,
+      "reason": "same failing set two rounds in a row"
+    },
+    {
+      "round": 3,
+      "score": 0.455,
+      "decision": "replan",
+      "failed": [
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10"
+      ],
+      "seconds": 80.0,
+      "similarity": 1.0,
+      "reason": "same failing set two rounds in a row"
+    },
+    {
+      "round": 4,
+      "score": 0.818,
+      "decision": "continue",
+      "failed": [
+        "C06",
+        "C08"
+      ],
+      "seconds": 53.2,
+      "similarity": 0.999,
+      "reason": "score improved"
+    },
+    {
+      "round": 5,
+      "score": 0.909,
+      "decision": "continue",
+      "failed": [
+        "C06"
+      ],
+      "seconds": 26.9,
+      "similarity": 0.998,
+      "reason": "score improved"
+    },
+    {
+      "round": 6,
+      "score": 0.909,
+      "decision": "stop",
+      "failed": [
+        "C06"
+      ],
+      "seconds": 72.0,
+      "similarity": 0.507,
+      "reason": "budget exhausted at score 0.909 >= 0.8: done with caveats"
+    }
+  ],
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Deploy manifest exists with https url",
+      "kind": "code",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "site/deploy.json exists=True url=https://donedone-job-be90c404.vercel.app",
+      "screenshot": "shots/C01_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C02",
+      "title": "Deployed site returns 200",
+      "kind": "http",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "GET https://donedone-job-be90c404.vercel.app/ -> 200 in 38ms; status 200 (want 200); body: '<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title>A100 GPU Status</title> <style> body { '",
+      "screenshot": null,
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C03",
+      "title": "Deployed site contains GPU name",
+      "kind": "http",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "GET https://donedone-job-be90c404.vercel.app/ -> 200 in 24ms; found 'A100' (status 200); body: '<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title>A100 GPU Status</title> <style> body { '",
+      "screenshot": null,
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C04",
+      "title": "Deployed site loads within 2 seconds",
+      "kind": "http",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "GET https://donedone-job-be90c404.vercel.app/ -> 200 in 16ms; latency 16ms (want < 2000ms, status 200); body: '<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title>A100 GPU Status</title> <style> body { '",
+      "screenshot": null,
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C05",
+      "title": "GPU name visible on page",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "[data-testid=\"gpu-name\"] textContent: got 'A100' (want contains 'A100')",
+      "screenshot": "shots/C05_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C06",
+      "title": "GPU memory values visible",
+      "kind": "dom",
+      "passed": false,
+      "score": 0.0,
+      "evidence": "[data-testid=\"gpu-memory-used\"] textContent: got '0' (want contains 'MiB')",
+      "screenshot": "shots/C06_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C07",
+      "title": "GPU utilization visible",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "[data-testid=\"gpu-utilization\"] textContent: got '0%' (want contains '%')",
+      "screenshot": "shots/C07_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C08",
+      "title": "GPU temperature visible",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "[data-testid=\"gpu-temperature\"] textContent: got '31C' (want contains 'C')",
+      "screenshot": "shots/C08_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C09",
+      "title": "Last updated timestamp visible",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "[data-testid=\"last-updated\"] textContent: got '2026-10-17T22:23:45.237Z' (want non-empty)",
+      "screenshot": "shots/C09_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C10",
+      "title": "Page renders without console errors",
+      "kind": "code",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "no console errors",
+      "screenshot": "shots/C10_desk11.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C11",
+      "title": "ntfy announcement contains deploy URL",
+      "kind": "http",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "GET https://ntfy.sh/<ntfy-topic>/json?poll=1&since=30m -> 200 in 25ms; found 'https://donedone-job-be90c404.vercel.app' (status 200); body: '{\"id\":\"OMdrgyU4osHj\",\"time\":1792275505,\"expires\":1792318705,\"event\":\"message\",\"topic\":\"<ntfy-topic>\",\"title\":\"A100 GPU Status Deployed\",\"message\":\"https://donedone-job-be90c4'",
+      "screenshot": null,
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    }
+  ],
+  "decision": "stop",
+  "message": "Done after 6 rounds, score 0.909 (budget exhausted at score 0.909 >= 0.8: done with caveats). Caveats: still failing C06.",
+  "goal": "Ship a live status page for our A100: a small web app that shows nvidia-smi output from our Lambda box, deployed to Vercel, verified in a real browser on a desktop, and announce the URL on ntfy.",
+  "elapsed_s": 358.5,
+  "updated_at": "2026-10-17T22:24:01+00:00",
+  "live_url": "https://sb-141gtolzp10h.vercel.run",
+  "novnc_url": "https://sb-34f0neszemja.vercel.run",
+  "desktop": "ready",
+  "usage": {
+    "calls": 153,
+    "prompt_tokens": 732687,
+    "completion_tokens": 17044,
+    "seconds": 239.98205542564392,
+    "retries": 28
+  },
+  "secrets": [
+    {
+      "name": "CRUSOE_API_KEY",
+      "status": "injected",
+      "source": "local-env",
+      "masked": "uKY1\u2026N9Bu",
+      "used_for": "LLM inference on Crusoe (Nemotron builder/verifier); always included",
+      "hint": "OpenAI-compatible base_url https://api.inference.crusoecloud.com/v1, api_key=$CRUSOE_API_KEY"
+    },
+    {
+      "name": "NTFY_TOPIC",
+      "status": "injected",
+      "source": "local-env",
+      "masked": "done\u2026hang",
+      "used_for": "push notifications / announcing results on ntfy.sh; always included",
+      "hint": "curl -d \"<message>\" https://ntfy.sh/$NTFY_TOPIC"
+    },
+    {
+      "name": "VERCEL_TOKEN",
+      "status": "injected",
+      "source": "local-env",
+      "masked": "vcp_\u2026lgLR",
+      "used_for": "deploy web apps to Vercel (VERCEL_TEAM_ID injected too when known)",
+      "hint": "cd site && npx -y vercel link --yes --project <name> --token $VERCEL_TOKEN ${VERCEL_TEAM_ID:+--scope $VERCEL_TEAM_ID} && npx -y vercel deploy --prod --yes --token $VERCEL_TOKEN ${VERCEL_TEAM_ID:+--scope $VERCEL_TEAM_ID}"
+    },
+    {
+      "name": "VERCEL_TEAM_ID",
+      "status": "injected",
+      "source": "file",
+      "masked": "team\u202683si",
+      "used_for": "Vercel team scope for deploys",
+      "hint": "--scope $VERCEL_TEAM_ID"
+    },
+    {
+      "name": "LAMBDA_SSH_KEY",
+      "status": "injected",
+      "source": "file",
+      "masked": "399 bytes",
+      "used_for": "SSH into the Lambda Labs A100 box; injected as GPU_SSH_KEY_B64 + GPU_HOST + GPU_USER",
+      "hint": "echo $GPU_SSH_KEY_B64 | base64 -d > /tmp/gpu_key && chmod 600 /tmp/gpu_key && ssh -i /tmp/gpu_key -o StrictHostKeyChecking=accept-new $GPU_USER@$GPU_HOST nvidia-smi"
+    },
+    {
+      "name": "GPU_HOST",
+      "status": "missing",
+      "source": "none",
+      "masked": "",
+      "used_for": "SSH into the Lambda Labs A100 box; injected as GPU_SSH_KEY_B64 + GPU_HOST + GPU_USER",
+      "hint": "echo $GPU_SSH_KEY_B64 | base64 -d > /tmp/gpu_key && chmod 600 /tmp/gpu_key && ssh -i /tmp/gpu_key -o StrictHostKeyChecking=accept-new $GPU_USER@$GPU_HOST nvidia-smi"
+    }
+  ],
+  "deploy_url": "https://donedone-job-be90c404.vercel.app",
+  "devices": [
+    {
+      "name": "sandbox-desktop",
+      "kind": "desktop",
+      "status": "ready",
+      "detail": ""
+    },
+    {
+      "name": "gpu-a100",
+      "kind": "gpu",
+      "status": "reachable",
+      "detail": "NVIDIA A100-SXM4-40GB, 40960 MiB"
+    }
+  ],
+  "desktop_note": "headed Chromium (kiosk) on :99",
+  "video_input": false,
+  "session_video": "session.mp4"
+}

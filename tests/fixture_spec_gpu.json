@@ -1,0 +1,177 @@
+{
+  "goal": "Write a state-of-the-art forward-pass Triton kernel for fused scaled-dot-product attention in fp16 that beats PyTorch SDPA on an A100.",
+  "summary": "Definition of Done for a fused fp16 scaled-dot-product attention Triton kernel on A100, covering compilation, correctness (including non-power-of-2 and causal variants), speedup vs PyTorch SDPA, TFLOPS efficiency, and latency at small shape.",
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Kernel compiles and runs at small shape",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "kernel.py imports and forward() executes without error at shape 1x4x128x64 fp16.",
+      "selector": null,
+      "property": null,
+      "expected": "true",
+      "op": "attention",
+      "shapes": {
+        "batch": 1,
+        "heads": 4,
+        "seq": 128,
+        "dim": 64,
+        "causal": false
+      },
+      "dtype": "fp16",
+      "metric": "compiles",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C02",
+      "title": "Correctness vs PyTorch SDPA (non-causal, power-of-2)",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "Max absolute error vs PyTorch SDPA reference is below 2e-2 at 2x8x1024x64 fp16 non-causal.",
+      "selector": null,
+      "property": null,
+      "expected": "< 2e-2",
+      "op": "attention",
+      "shapes": {
+        "batch": 2,
+        "heads": 8,
+        "seq": 1024,
+        "dim": 64,
+        "causal": false
+      },
+      "dtype": "fp16",
+      "metric": "max_abs_err",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C03",
+      "title": "Correctness vs PyTorch SDPA (non-power-of-2 seq)",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "Max absolute error vs PyTorch SDPA reference is below 2e-2 at 1x4x1000x64 fp16 non-causal (non-power-of-2 length).",
+      "selector": null,
+      "property": null,
+      "expected": "< 2e-2",
+      "op": "attention",
+      "shapes": {
+        "batch": 1,
+        "heads": 4,
+        "seq": 1000,
+        "dim": 64,
+        "causal": false
+      },
+      "dtype": "fp16",
+      "metric": "max_abs_err",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C04",
+      "title": "Correctness vs PyTorch SDPA (causal)",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "Max absolute error vs PyTorch SDPA causal reference is below 2e-2 at 2x8x1024x64 fp16 causal.",
+      "selector": null,
+      "property": null,
+      "expected": "< 2e-2",
+      "op": "attention",
+      "shapes": {
+        "batch": 2,
+        "heads": 8,
+        "seq": 1024,
+        "dim": 64,
+        "causal": true
+      },
+      "dtype": "fp16",
+      "metric": "max_abs_err",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C05",
+      "title": "Speedup vs PyTorch SDPA at headline shape",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "Kernel is at least 1.0x faster than PyTorch SDPA at 8x16x2048x64 fp16 non-causal.",
+      "selector": null,
+      "property": null,
+      "expected": ">= 1.0",
+      "op": "attention",
+      "shapes": {
+        "batch": 8,
+        "heads": 16,
+        "seq": 2048,
+        "dim": 64,
+        "causal": false
+      },
+      "dtype": "fp16",
+      "metric": "speedup_vs_torch",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C06",
+      "title": "TFLOPS at headline shape",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "Kernel achieves at least 120 TFLOPS at 8x16x2048x64 fp16 non-causal.",
+      "selector": null,
+      "property": null,
+      "expected": ">= 120",
+      "op": "attention",
+      "shapes": {
+        "batch": 8,
+        "heads": 16,
+        "seq": 2048,
+        "dim": 64,
+        "causal": false
+      },
+      "dtype": "fp16",
+      "metric": "tflops",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C07",
+      "title": "Latency at small shape",
+      "kind": "gpu",
+      "steps": [],
+      "criteria": "Kernel forward pass completes in under 0.5 ms at 1x8x512x64 fp16 non-causal.",
+      "selector": null,
+      "property": null,
+      "expected": "< 0.5",
+      "op": "attention",
+      "shapes": {
+        "batch": 1,
+        "heads": 8,
+        "seq": 512,
+        "dim": 64,
+        "causal": false
+      },
+      "dtype": "fp16",
+      "metric": "ms",
+      "threshold": 0.7,
+      "weight": 1.0
+    }
+  ],
+  "environment": {
+    "needs_browser": false,
+    "needs_desktop": false,
+    "needs_macos": false,
+    "needs_gpu": true,
+    "packages": [
+      "torch",
+      "triton"
+    ],
+    "rationale": "The harness imports kernel.py and runs it on a real NVIDIA A100 over SSH, comparing against a PyTorch SDPA reference; no browser or macOS is needed."
+  },
+  "design_facts": [
+    "kernel.py exposes `def forward(q, k, v, causal: bool = False) -> torch.Tensor`; q,k,v are [batch, heads, seq, dim] fp16 CUDA tensors (contiguous); softmax scale = dim**-0.5; causal masks keys j > i; returns [batch, heads, seq, dim] in the input dtype.",
+    "kernel.py may import torch and triton; it must NOT call torch.nn.functional.scaled_dot_product_attention, torch.matmul / @ / torch.bmm, or torch.softmax for the core op.",
+    "FlashAttention-2 style online softmax with fp32 accumulators, tile sizes BLOCK_M=128, BLOCK_N=64, num_warps 4-8, num_stages 2-3, and skip fully-masked causal tiles.",
+    "A100 fp16 tensor core peak is 312 TFLOPS; headline shape batch 8, heads 16, seq 2048, dim 64; small latency shape 1x8x512x64."
+  ]
+}

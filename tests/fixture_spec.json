@@ -1,0 +1,221 @@
+{
+  "goal": "Recreate the feel and motion of JetBrains CLion IDE: colors, easing curves, timings.",
+  "summary": "Definition of done for a web page that recreates the JetBrains CLion IDE look and feel: Darcula dark theme colors, easing curves, animation timings, and UI layout. Verified via DOM computed styles, timing checks, visual scoring, and code checks.",
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Page has no console errors",
+      "kind": "code",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "No console error messages are logged after page load",
+      "selector": null,
+      "property": null,
+      "expected": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C02",
+      "title": "Body background is Darcula dark #1B1B1E",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed background-color of body equals #1b1b1e",
+      "selector": "body",
+      "property": "background-color",
+      "expected": "#1b1b1e",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C03",
+      "title": "Editor background is panel color #252526",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed background-color of the editor equals #252526",
+      "selector": "[data-testid=\"editor\"]",
+      "property": "background-color",
+      "expected": "#252526",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C04",
+      "title": "Sidebar background is panel color #252526",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed background-color of the sidebar equals #252526",
+      "selector": "[data-testid=\"sidebar\"]",
+      "property": "background-color",
+      "expected": "#252526",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C05",
+      "title": "Sidebar width is 240px",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed width of the sidebar is 240px",
+      "selector": "[data-testid=\"sidebar\"]",
+      "property": "width",
+      "expected": "240px",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C06",
+      "title": "Status bar height is 24px",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed height of the status bar is 24px",
+      "selector": "[data-testid=\"status-bar\"]",
+      "property": "height",
+      "expected": "24px",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C07",
+      "title": "Run button accent color is #007ACC",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed background-color of the run button equals #007acc",
+      "selector": "[data-testid=\"run-button\"]",
+      "property": "background-color",
+      "expected": "#007acc",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C08",
+      "title": "Run button hover transition is 150ms cubic-bezier(0.2, 0, 0, 1)",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed transition of the run button contains 150ms and cubic-bezier(0.2, 0, 0, 1)",
+      "selector": "[data-testid=\"run-button\"]",
+      "property": "transition",
+      "expected": "150ms cubic-bezier(0.2, 0, 0, 1)",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C09",
+      "title": "Run button hover background changes to hover color",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"run-button\"]",
+        "wait 200"
+      ],
+      "criteria": "Run button background changes to hover color within 150-250ms",
+      "selector": "[data-testid=\"run-button\"]",
+      "property": "background-color",
+      "expected": "#3a3a3d",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C10",
+      "title": "Font family is JetBrains Mono",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed font-family of body contains JetBrains Mono",
+      "selector": "body",
+      "property": "font-family",
+      "expected": "JetBrains Mono",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C11",
+      "title": "Font size is 13px",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Computed font-size of body is 13px",
+      "selector": "body",
+      "property": "font-size",
+      "expected": "13px",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C12",
+      "title": "Tooltip appears after 500ms hover delay",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"run-button\"]",
+        "wait 600"
+      ],
+      "criteria": "Tooltip becomes visible after 500-900ms of hovering",
+      "selector": "[data-testid=\"tooltip\"]",
+      "property": "visibility",
+      "expected": "visible",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C13",
+      "title": "Overall visual matches CLion Darcula theme",
+      "kind": "visual",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Screenshot visually matches JetBrains CLion Darcula dark theme with correct colors, spacing, and layout",
+      "selector": null,
+      "property": null,
+      "expected": null,
+      "threshold": 0.7,
+      "weight": 1.5
+    }
+  ],
+  "environment": {
+    "needs_browser": true,
+    "needs_desktop": false,
+    "needs_macos": false,
+    "needs_gpu": false,
+    "packages": [
+      "playwright",
+      "chromium"
+    ],
+    "rationale": "This is a web UI recreation of a desktop IDE theme; it runs in a headless Chromium browser via Playwright. No native desktop, macOS, or GPU is required."
+  },
+  "design_facts": [
+    "Background color: #1B1B1E (Darcula dark)",
+    "Panel color: #252526",
+    "Accent color: #007ACC (JetBrains blue)",
+    "Text color: #CFCFCF",
+    "Border color: #454545",
+    "Hover background: #3A3A3D",
+    "Selection background: #3E6B8F",
+    "Transition easing: cubic-bezier(0.2, 0, 0, 1)",
+    "Button hover transition: 150ms ease",
+    "Tooltip show delay: 500ms",
+    "Tooltip hide delay: 300ms",
+    "Sidebar width: 240px",
+    "Status bar height: 24px",
+    "Font family: JetBrains Mono, monospace",
+    "Font size: 13px",
+    "Line height: 1.5"
+  ]
+}

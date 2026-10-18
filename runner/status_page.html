@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>donedone live</title>
+<style>
+:root{--bg:#141518;--panel:#1e1f22;--line:#2f3136;--fg:#d6d7da;--dim:#8b8e95;--ok:#4fbf7a;--bad:#e5534b;--warn:#d9a83c;--acc:#3574f0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;padding:16px}
+main{max-width:1100px;margin:0 auto}h1{font-size:18px;margin:0 0 4px}a{color:#79a7ff}
+.goal{color:var(--dim);margin-bottom:14px}
+.cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:130px;flex:1}
+.card b{display:block;font-size:20px}.card span{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--acc);transition:width .4s}
+.phase-done b{color:var(--ok)}.phase-escalated b,.phase-failed b{color:var(--bad)}.phase-replanning b{color:var(--warn)}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:14px}
+table{border-collapse:collapse;width:100%;min-width:640px}th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:500;font-size:12px}tr:last-child td{border-bottom:0}
+.pass{color:var(--ok);font-weight:600}.fail{color:var(--bad);font-weight:600}.pend{color:var(--dim)}
+td.ev{color:var(--dim);font-size:12px;max-width:420px;word-break:break-word}
+img.th{width:120px;border:1px solid var(--line);border-radius:4px;display:block}
+.msg{background:var(--panel);border-left:3px solid var(--acc);padding:8px 12px;margin-bottom:14px;border-radius:4px}
+.links{color:var(--dim)}
+.desk{margin:0 0 12px}.desk a{display:inline-block;background:var(--acc);color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-weight:600}
+.desk .off{color:var(--dim)}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.pill.ok{color:var(--ok)}.pill.bad{color:var(--bad)}.pill.warn{color:var(--warn)}.pill.dim{color:var(--dim)}
+h2{font-size:14px;margin:0;padding:10px 10px 4px;color:var(--fg)}
+.devs{list-style:none;margin:0;padding:4px 10px 10px;display:flex;flex-wrap:wrap;gap:8px}
+.devs li{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 10px}
+.devs small{color:var(--dim)}code{font-size:12px}
+.deployed{margin:0 0 12px}.deployed a{display:inline-block;background:var(--ok);color:#06210f;text-decoration:none;padding:8px 14px;border-radius:6px;font-weight:600;word-break:break-all}.media{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}.media .tag{font-size:12px}
+</style></head><body><main>
+<h1>donedone <span id="job"></span></h1><div class="goal" id="goal"></div>
+<div class="cards">
+ <div class="card" id="phasecard"><span>phase</span><b id="phase">-</b></div>
+ <div class="card"><span>round</span><b id="round">-</b></div>
+ <div class="card"><span>score</span><b id="score">-</b><div class="bar"><i id="bar" style="width:0"></i></div></div>
+ <div class="card"><span>elapsed</span><b id="elapsed">-</b></div>
+</div>
+<p id="desk" class="desk"></p>
+<p id="deployed" class="deployed"></p>
+<div class="msg" id="msg">waiting for status.json ...</div>
+<div class="wrap"><table><thead><tr><th>check</th><th>kind</th><th>result</th><th>evidence</th><th>screenshot</th></tr></thead><tbody id="checks"></tbody></table></div>
+<div class="wrap" id="credwrap" style="display:none"><h2>Credentials &amp; devices</h2>
+<table><thead><tr><th>name</th><th>status</th><th>source</th><th>masked</th><th>used for</th></tr></thead><tbody id="creds"></tbody></table>
+<ul class="devs" id="devs"></ul></div>
+<div class="wrap"><table><thead><tr><th>round</th><th>score</th><th>decision</th><th>failed</th></tr></thead><tbody id="hist"></tbody></table></div>
+<p class="links"><span id="replay"></span><a href="report.md">report.md</a> · <a href="log.txt">log.txt</a> · <a href="status.json">status.json</a> · <a href="site/">built site</a> · refreshes every 3 s · <span id="upd"></span></p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function tick(){
+  try{
+    const d=await (await fetch('status.json?'+Date.now(),{cache:'no-store'})).json();
+    $('job').textContent=d.job_id||'';$('goal').textContent=d.goal||'';
+    $('phase').textContent=d.phase;$('phasecard').className='card phase-'+d.phase;
+    $('round').textContent=(d.round||0)+' / '+(d.max_rounds||'?');
+    const s=Number(d.score||0);$('score').textContent=s.toFixed(2);$('bar').style.width=(s*100)+'%';
+    $('elapsed').textContent=Math.round(d.elapsed_s||0)+' s';$('msg').textContent=d.message||'';
+    $('upd').textContent='updated '+(d.updated_at||'');
+    $('replay').innerHTML=d.session_video?`<a href="${esc(d.session_video)}" target="_blank"><b>Replay session</b></a> · `:'';
+    const nv=(d.novnc_url||'').replace(/\/+$/,'');
+    $('desk').innerHTML=nv&&d.desktop==='ready'
+      ?`<a href="${esc(nv)}/vnc.html?autoconnect=1&resize=scale" target="_blank">Watch live desktop</a> <span class="off">${esc(d.desktop_note||'')}${d.video_input?' · judge sees native video':''}</span>`
+      :`<span class="off">live desktop: ${esc(d.desktop||'unknown')}${d.desktop_note?' ('+esc(d.desktop_note)+')':''}</span>`;
+    const du=d.deploy_url||'';
+    $('deployed').innerHTML=/^https?:\/\//.test(du)?`<a href="${esc(du)}" target="_blank" rel="noopener">Deployed app: ${esc(du)}</a>`:'';
+    const sec=Array.isArray(d.secrets)?d.secrets:[],dev=Array.isArray(d.devices)?d.devices:[];
+    $('credwrap').style.display=(sec.length||dev.length)?'':'none';
+    $('creds').innerHTML=sec.length?sec.map(x=>{
+      const st=String(x.status||'?'),cls=st==='injected'?'ok':st==='missing'?'bad':'warn';
+      return `<tr><td><code>${esc(x.name)}</code></td><td><span class="pill ${cls}">${esc(st)}</span></td><td>${esc(x.source)}</td><td><code>${esc(x.masked)}</code></td><td class="ev">${esc(x.used_for)}${x.hint&&st!=='injected'?' <span class="pend">· '+esc(x.hint)+'</span>':''}</td></tr>`}).join('')
+      :'<tr><td colspan="5" class="pend">no credential ledger</td></tr>';
+    $('devs').innerHTML=dev.map(x=>{
+      const st=String(x.status||'?').toLowerCase(),cls=/ready|reachable|configured/.test(st)&&!/not /.test(st)?'ok':/denied|unreachable|unavailable|not /.test(st)?'bad':'dim';
+      return `<li><b>${esc(x.name)}</b> <small>${esc(x.kind)}</small> <span class="pill ${cls}">${esc(x.status)}</span>${x.detail?' <small>'+esc(x.detail)+'</small>':''}</li>`}).join('');
+    $('checks').innerHTML=(d.checks||[]).map(c=>{
+      const r=c.passed===true?'<span class="pass">PASS</span>':c.passed===false?'<span class="fail">FAIL</span>':'<span class="pend">…</span>';
+      let img=c.screenshot?`<a href="${esc(c.screenshot)}" target="_blank"><img class="th" loading="lazy" src="${esc(c.screenshot)}?${d.round}"></a>`:'';
+      if(c.sheet) img+=`<a href="${esc(c.sheet)}" target="_blank"><img class="th" loading="lazy" title="contact sheet" src="${esc(c.sheet)}?${d.round}"></a>`;
+      if(c.clip) img+=`<a class="tag" href="${esc(c.clip)}" target="_blank">clip.mp4</a>`;
+      if(c.sheet) img+=`<a class="tag" href="${esc(c.sheet)}" target="_blank">contact sheet</a>`;
+      if(c.judged&&c.kind==='visual') img+=`<span class="tag pend" title="${esc(c.judged)}">judged: ${c.judged.endsWith('.mp4')?'video':c.judged.includes('_sheet')?'contact sheet':'screenshot'}</span>`;
+      img=`<div class="media">${img}</div>`;
+      return `<tr><td><b>${esc(c.id)}</b> ${esc(c.title)}</td><td>${esc(c.kind)}</td><td>${r}${c.score!=null&&c.kind==='visual'?' '+esc(c.score):''}</td><td class="ev">${esc(c.evidence)}</td><td>${img}</td></tr>`}).join('');
+    $('hist').innerHTML=(d.history||[]).map(h=>`<tr><td>${h.round}</td><td>${h.score}</td><td>${esc(h.decision)}${h.reason?' <span class="pend">('+esc(h.reason)+')</span>':''}</td><td>${esc((h.failed||[]).join(', '))}</td></tr>`).join('');
+  }catch(e){$('msg').textContent='waiting for status.json ... '+e}
+}
+tick();setInterval(tick,3000);
+</script></body></html>

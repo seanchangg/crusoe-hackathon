@@ -1,0 +1,319 @@
+{
+  "goal": "Recreate the feel and motion of Slack's desktop app: the purple sidebar and channel list, message hover actions, the compose box, and the exact easing curves, durations and colors of its transitions",
+  "summary": "A single-page web app that reproduces Slack's desktop UI feel and motion: the purple sidebar and channel list, message hover actions (reply/thread/react/three-dot menu), the compose box, and Slack's exact transition easing curves, durations and colors. Verified via DOM property checks, timing checks for animation durations, and visual checks for overall feel.",
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Sidebar background is Slack purple #43195F",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Sidebar background color equals Slack purple #43195F",
+      "selector": "[data-testid=\"sidebar\"]",
+      "property": "background-color",
+      "expected": "rgb(67, 25, 95)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C02",
+      "title": "Sidebar item hover background is #2D1B3B with 150ms ease-out",
+      "kind": "dom",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"sidebar-item\"]:first-child",
+        "wait 200"
+      ],
+      "criteria": "Sidebar item hover background color equals #2D1B3B",
+      "selector": "[data-testid=\"sidebar-item\"]:first-child",
+      "property": "background-color",
+      "expected": "rgb(45, 27, 59)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C03",
+      "title": "Sidebar item hover transition duration is 150ms ease-out",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"sidebar-item\"]:first-child",
+        "wait 200"
+      ],
+      "criteria": "Sidebar item hover transition duration is 150ms with ease-out easing",
+      "selector": "[data-testid=\"sidebar-item\"]:first-child",
+      "property": "transition-duration",
+      "expected": "150ms",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C04",
+      "title": "Sidebar collapse/expand animation completes in 200ms",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "click [data-testid=\"sidebar-toggle\"]",
+        "wait 250"
+      ],
+      "criteria": "Sidebar collapse/expand animation completes within 200ms",
+      "selector": "[data-testid=\"sidebar\"]",
+      "property": "width",
+      "expected": "collapsed width reached within 180-220ms",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C05",
+      "title": "Channel list background is #E7ECED",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Channel list background color equals #E7ECED",
+      "selector": "[data-testid=\"channel-list\"]",
+      "property": "background-color",
+      "expected": "rgb(231, 236, 237)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C06",
+      "title": "Message hover background is #EAEBF0",
+      "kind": "dom",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"message\"]:first-child",
+        "wait 200"
+      ],
+      "criteria": "Message hover background color equals #EAEBF0",
+      "selector": "[data-testid=\"message\"]:first-child",
+      "property": "background-color",
+      "expected": "rgb(234, 235, 240)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C07",
+      "title": "Message hover actions appear after hover with 150ms fade",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"message\"]:first-child",
+        "wait 200"
+      ],
+      "criteria": "Message hover actions become visible within 150ms of hover",
+      "selector": "[data-testid=\"message-hover-actions\"]",
+      "property": "opacity",
+      "expected": "1",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C08",
+      "title": "Hover actions include reply, thread, react, more icons",
+      "kind": "dom",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"message\"]:first-child",
+        "wait 200"
+      ],
+      "criteria": "Hover actions container contains exactly 4 action buttons: reply, thread, react, more",
+      "selector": "[data-testid=\"message-hover-actions\"]",
+      "property": "children-count",
+      "expected": "4",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C09",
+      "title": "Compose box has #FFFFFF background and #D5D8DC border",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Compose box border color equals #D5D8DC and background is #FFFFFF",
+      "selector": "[data-testid=\"compose-box\"]",
+      "property": "border-color",
+      "expected": "rgb(213, 216, 220)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C10",
+      "title": "Compose box focus shows purple border #4A154B and shadow",
+      "kind": "dom",
+      "steps": [
+        "goto /",
+        "click [data-testid=\"compose-box\"]",
+        "wait 100"
+      ],
+      "criteria": "Compose box focus border color equals #4A154B with purple box-shadow",
+      "selector": "[data-testid=\"compose-box\"]",
+      "property": "border-color",
+      "expected": "rgb(74, 21, 75)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C11",
+      "title": "Sidebar text uses Lato font at 14px",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Sidebar text font family contains Lato and font size is 14px",
+      "selector": "[data-testid=\"sidebar-item\"]:first-child",
+      "property": "font-family",
+      "expected": "Lato",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C12",
+      "title": "Unread indicator dot is #E01E5A",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "Unread indicator dot background color equals #E01E5A",
+      "selector": "[data-testid=\"unread-indicator\"]",
+      "property": "background-color",
+      "expected": "rgb(224, 30, 90)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C13",
+      "title": "Overall Slack feel and motion matches reference",
+      "kind": "visual",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"sidebar-item\"]:first-child",
+        "wait 200",
+        "hover [data-testid=\"message\"]:first-child",
+        "wait 200",
+        "click [data-testid=\"compose-box\"]",
+        "wait 100"
+      ],
+      "criteria": "Overall visual feel and motion of the page matches Slack desktop app reference",
+      "selector": "body",
+      "property": null,
+      "expected": "Sidebar purple, hover actions, compose box, and transitions match Slack desktop feel",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    }
+  ],
+  "environment": {
+    "needs_browser": true,
+    "needs_desktop": false,
+    "needs_macos": false,
+    "needs_gpu": false,
+    "packages": [],
+    "secrets": [
+      "CRUSOE_API_KEY",
+      "NTFY_TOPIC"
+    ],
+    "devices": [
+      "sandbox-desktop"
+    ],
+    "rationale": "This is a web UI recreation goal requiring a headless Chromium browser in a Linux VM to verify DOM styles, animation timings, and visual feel. No GPU, desktop native app, macOS, or API secrets beyond the standard CRUSOE_API_KEY and NTFY_TOPIC are needed."
+  },
+  "design_facts": [
+    "Slack sidebar background: #43195F (deep purple)",
+    "Slack sidebar active/hover item: #2D1B3B (darker purple)",
+    "Slack sidebar text: #FFFFFF, unread indicator dot: #E01E5A (pink/red)",
+    "Slack channel list background: #E7ECED (light grey-blue)",
+    "Slack message area background: #FFFFFF",
+    "Slack message hover background: #EAEBF0 (light purple-grey)",
+    "Slack message hover actions appear on hover with 150ms ease-out fade",
+    "Slack hover action icons: reply, thread, react, more (three dots)",
+    "Slack compose box: rounded rectangle, #FFFFFF background, 1px #D5D8DC border, placeholder #868E96 text",
+    "Slack compose box focus: border #4A154B (purple), box-shadow 0 0 0 2px rgba(74,21,75,0.2)",
+    "Slack transition easing: cubic-bezier(0.2, 0, 0, 1) for standard ease-out",
+    "Slack sidebar collapse/expand duration: 200ms",
+    "Slack hover state transition duration: 150ms",
+    "Slack message hover action reveal: 150ms ease-out",
+    "Slack compose box height: 44px default, expands on focus",
+    "Slack font: 'Slack-Lato', 'Lato', sans-serif; sidebar text 14px, channel list 14px, messages 15px"
+  ]
+}

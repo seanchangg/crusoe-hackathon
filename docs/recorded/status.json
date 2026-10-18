@@ -1,0 +1,248 @@
+{
+  "job_id": "9db99f10",
+  "phase": "done",
+  "round": 5,
+  "max_rounds": 6,
+  "score": 1.0,
+  "history": [
+    {
+      "round": 1,
+      "score": 0.704,
+      "decision": "continue",
+      "failed": [
+        "C07",
+        "C08",
+        "C09",
+        "C12"
+      ],
+      "seconds": 85.9,
+      "similarity": null,
+      "reason": "first round"
+    },
+    {
+      "round": 2,
+      "score": 0.704,
+      "decision": "replan",
+      "failed": [
+        "C07",
+        "C08",
+        "C09",
+        "C12"
+      ],
+      "seconds": 185.8,
+      "similarity": 0.929,
+      "reason": "same failing set two rounds in a row"
+    },
+    {
+      "round": 3,
+      "score": 0.778,
+      "decision": "continue",
+      "failed": [
+        "C07",
+        "C08",
+        "C09"
+      ],
+      "seconds": 43.1,
+      "similarity": 0.926,
+      "reason": "score improved"
+    },
+    {
+      "round": 4,
+      "score": 0.778,
+      "decision": "replan",
+      "failed": [
+        "C07",
+        "C08",
+        "C09"
+      ],
+      "seconds": 40.6,
+      "similarity": 0.961,
+      "reason": "same failing set two rounds in a row"
+    },
+    {
+      "round": 5,
+      "score": 1.0,
+      "decision": "stop",
+      "failed": [],
+      "seconds": 334.2,
+      "similarity": 0.983,
+      "reason": "all checks pass"
+    }
+  ],
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Page has no console errors",
+      "kind": "code",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "no console errors",
+      "screenshot": "shots/C01_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C02",
+      "title": "Body background is Darcula dark #1B1B1E",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "background-color: got #1b1b1e, want #1b1b1e",
+      "screenshot": "shots/C02_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C03",
+      "title": "Editor background is panel color #252526",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "background-color: got #252526, want #252526",
+      "screenshot": "shots/C03_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C04",
+      "title": "Sidebar background is panel color #252526",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "background-color: got #252526, want #252526",
+      "screenshot": "shots/C04_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C05",
+      "title": "Sidebar width is 240px",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "width: got 240px",
+      "screenshot": "shots/C05_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C06",
+      "title": "Status bar height is 24px",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "height: got 24px",
+      "screenshot": "shots/C06_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C07",
+      "title": "Run button accent color is #007ACC",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "background-color: got #007acc, want #007acc",
+      "screenshot": "shots/C07_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C08",
+      "title": "Run button hover transition is 150ms cubic-bezier(0.2, 0, 0, 1)",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "transition: durations [150.0] vs [150.0]; easing [(0.2, 0.0, 0.0, 1.0)] vs [(0.2, 0.0, 0.0, 1.0)] (raw 'background-color 0.15s cubic-bezier(0.2, 0, 0, 1)')",
+      "screenshot": "shots/C08_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C09",
+      "title": "Run button hover background changes to hover color",
+      "kind": "timing",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "rAF 54 samples; target #3a3a3d reached at 133ms after trigger; final=#3a3a3d visible; pixel-settle\u2248232ms (31 frames @ 30fps, desktop clip C09_timing.mp4); want 150-250ms",
+      "screenshot": "shots/C09_timing_sheet.png",
+      "clip": "shots/C09_timing.mp4",
+      "sheet": "shots/C09_timing_sheet.png",
+      "judged": null
+    },
+    {
+      "id": "C10",
+      "title": "Font family is JetBrains Mono",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "font-family: got '\"JetBrains Mono\", monospace'",
+      "screenshot": "shots/C10_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C11",
+      "title": "Font size is 13px",
+      "kind": "dom",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "font-size: got 13px",
+      "screenshot": "shots/C11_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": null
+    },
+    {
+      "id": "C12",
+      "title": "Tooltip appears after 500ms hover delay",
+      "kind": "timing",
+      "passed": true,
+      "score": 1.0,
+      "evidence": "rAF 94 samples; target visible reached at 517ms after trigger; final=visible visible; pixel-settle\u2248798ms (50 frames @ 30fps, desktop clip C12_timing.mp4); want 500-900ms",
+      "screenshot": "shots/C12_timing_sheet.png",
+      "clip": "shots/C12_timing.mp4",
+      "sheet": "shots/C12_timing_sheet.png",
+      "judged": null
+    },
+    {
+      "id": "C13",
+      "title": "Overall visual matches CLion Darcula theme",
+      "kind": "visual",
+      "passed": true,
+      "score": 0.82,
+      "evidence": "SuperVL score 0.82 (threshold 0.7, judged screenshot of the page): The layout and dark theme colors closely match CLion Darcula, with correct panel and accent colors, though the sidebar width and some spacing appear slightly off.",
+      "screenshot": "shots/C13_final.png",
+      "clip": null,
+      "sheet": null,
+      "judged": "shots/C13_final.png"
+    }
+  ],
+  "decision": "stop",
+  "message": "Done after 5 rounds, score 1.0 (all checks pass).",
+  "goal": "Recreate the feel and motion of JetBrains CLion IDE: colors, easing curves, timings.",
+  "elapsed_s": 695.2,
+  "updated_at": "2026-10-17T20:59:46+00:00",
+  "live_url": "https://sb-3hg13uch6fro.vercel.run",
+  "novnc_url": "https://sb-6wvoedvlaoqz.vercel.run",
+  "desktop": "ready",
+  "usage": {
+    "calls": 160,
+    "prompt_tokens": 449552,
+    "completion_tokens": 23165,
+    "seconds": 551.2042121887207,
+    "retries": 69
+  },
+  "desktop_note": "headed Chromium (kiosk) on :99",
+  "video_input": false,
+  "session_video": "session.mp4"
+}

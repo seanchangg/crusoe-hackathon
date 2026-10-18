@@ -1,0 +1,242 @@
+{
+  "goal": "Ship a live status page for our A100: a small web app that shows nvidia-smi output from our Lambda box, deployed to Vercel, verified in a real browser on a desktop, and announce the URL on ntfy.",
+  "summary": "A Vercel-deployed status page baked at build time with nvidia-smi data (GPU name, memory, utilization, temperature, last updated) fetched over SSH from the Lambda A100 box, verified in a headless Chromium desktop browser, and announced on ntfy.",
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Deploy manifest exists with https url",
+      "kind": "code",
+      "steps": [],
+      "criteria": "site/deploy.json exists and contains an https url",
+      "selector": null,
+      "property": null,
+      "expected": "exists",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C02",
+      "title": "Deployed site returns 200",
+      "kind": "http",
+      "steps": [],
+      "criteria": "GET ${DEPLOY_URL}/ returns HTTP 200",
+      "selector": null,
+      "property": null,
+      "expected": "status 200",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": "${DEPLOY_URL}/",
+      "method": "GET",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C03",
+      "title": "Deployed site contains GPU name",
+      "kind": "http",
+      "steps": [],
+      "criteria": "GET ${DEPLOY_URL}/ response body contains the A100 GPU name",
+      "selector": null,
+      "property": null,
+      "expected": "contains: A100",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": "${DEPLOY_URL}/",
+      "method": "GET",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C04",
+      "title": "Deployed site loads within 2 seconds",
+      "kind": "http",
+      "steps": [],
+      "criteria": "GET ${DEPLOY_URL}/ latency is under 2000ms",
+      "selector": null,
+      "property": null,
+      "expected": "latency < 2000ms",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": "${DEPLOY_URL}/",
+      "method": "GET",
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C05",
+      "title": "GPU name visible on page",
+      "kind": "dom",
+      "steps": [
+        "goto ${DEPLOY_URL}"
+      ],
+      "criteria": "The element [data-testid=\"gpu-name\"] contains the GPU name (e.g. A100)",
+      "selector": "[data-testid=\"gpu-name\"]",
+      "property": "textContent",
+      "expected": "contains: A100",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C06",
+      "title": "GPU memory values visible",
+      "kind": "dom",
+      "steps": [
+        "goto ${DEPLOY_URL}"
+      ],
+      "criteria": "Both [data-testid=\"gpu-memory-used\"] and [data-testid=\"gpu-memory-total\"] are non-empty and contain MiB values",
+      "selector": "[data-testid=\"gpu-memory-used\"]",
+      "property": "textContent",
+      "expected": "contains: MiB",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C07",
+      "title": "GPU utilization visible",
+      "kind": "dom",
+      "steps": [
+        "goto ${DEPLOY_URL}"
+      ],
+      "criteria": "[data-testid=\"gpu-utilization\"] is non-empty and contains a percent value",
+      "selector": "[data-testid=\"gpu-utilization\"]",
+      "property": "textContent",
+      "expected": "contains: %",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C08",
+      "title": "GPU temperature visible",
+      "kind": "dom",
+      "steps": [
+        "goto ${DEPLOY_URL}"
+      ],
+      "criteria": "[data-testid=\"gpu-temperature\"] is non-empty and contains a Celsius value",
+      "selector": "[data-testid=\"gpu-temperature\"]",
+      "property": "textContent",
+      "expected": "contains: C",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C09",
+      "title": "Last updated timestamp visible",
+      "kind": "dom",
+      "steps": [
+        "goto ${DEPLOY_URL}"
+      ],
+      "criteria": "[data-testid=\"last-updated\"] is non-empty and contains a timestamp",
+      "selector": "[data-testid=\"last-updated\"]",
+      "property": "textContent",
+      "expected": "non-empty",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C10",
+      "title": "Page renders without console errors",
+      "kind": "code",
+      "steps": [
+        "goto ${DEPLOY_URL}",
+        "wait 2000"
+      ],
+      "criteria": "No console errors are logged after page load",
+      "selector": null,
+      "property": null,
+      "expected": "no console errors",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C11",
+      "title": "ntfy announcement contains deploy URL",
+      "kind": "http",
+      "steps": [],
+      "criteria": "GET https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=30m response contains ${DEPLOY_URL}",
+      "selector": null,
+      "property": null,
+      "expected": "contains: ${DEPLOY_URL}",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": "https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=30m",
+      "method": "GET",
+      "threshold": 0.7,
+      "weight": 1.0
+    }
+  ],
+  "environment": {
+    "needs_browser": true,
+    "needs_desktop": false,
+    "needs_macos": false,
+    "needs_gpu": true,
+    "packages": [],
+    "secrets": [
+      "CRUSOE_API_KEY",
+      "NTFY_TOPIC",
+      "VERCEL_TOKEN",
+      "LAMBDA_SSH_KEY"
+    ],
+    "devices": [
+      "sandbox-desktop",
+      "gpu-a100"
+    ],
+    "rationale": "Needs a desktop browser (sandbox-desktop) to verify the deployed page and a GPU box (gpu-a100 / Lambda A100) to fetch nvidia-smi over SSH at build time. CRUSOE_API_KEY and NTFY_TOPIC are always present; VERCEL_TOKEN for deployment; LAMBDA_SSH_KEY to reach the A100 box."
+  },
+  "design_facts": [
+    "The builder fetches nvidia-smi over SSH at build time using `ssh -i /tmp/gpu_key $GPU_USER@$GPU_HOST nvidia-smi` and bakes the results into the page (or a JSON file the page loads).",
+    "The page shows GPU name, memory used/total, utilization, temperature, and a \"last updated\" timestamp, each with data-testid attributes: [data-testid=\"gpu-name\"], [data-testid=\"gpu-memory-used\"], [data-testid=\"gpu-memory-total\"], [data-testid=\"gpu-utilization\"], [data-testid=\"gpu-temperature\"], [data-testid=\"last-updated\"].",
+    "The app is deployed to Vercel with `npx -y vercel link --yes --project <name> --token $VERCEL_TOKEN` and `npx -y vercel deploy --prod --yes --token $VERCEL_TOKEN`, then writes site/deploy.json = {\"url\": \"<deployed https url>\"}.",
+    "The deployed URL is announced on ntfy.sh via POST to https://ntfy.sh/${NTFY_TOPIC} with the URL in the message body.",
+    "The browser verifier uses data-testid selectors and reads computed styles where needed."
+  ]
+}

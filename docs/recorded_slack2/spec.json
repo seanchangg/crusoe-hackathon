@@ -1,0 +1,232 @@
+{
+  "goal": "Recreate the feel and motion of Slack's desktop app as shown in the reference screenshot: the purple sidebar and channel list, message hover actions, the compose box, and the exact easing curves, durations and colors of its transitions. Use data-testid attributes: sidebar, sidebar-item, channel-list, message, message-hover-actions, compose-box, unread-indicator.",
+  "summary": "Build a static web page that reproduces the Slack-like purple sidebar, channel list, message list with hover actions, and compose box, matching the reference screenshot's colors, spacing, and transition easing/durations, with the specified data-testid attributes for verification.",
+  "checks": [
+    {
+      "id": "C01",
+      "title": "Sidebar has purple background matching Slack",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "sidebar background color equals #4C337C",
+      "selector": "[data-testid=\"sidebar\"]",
+      "property": "background-color",
+      "expected": "rgb(76, 51, 124)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C02",
+      "title": "Active channel item has blue background",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "active sidebar item background color equals #2E5C9A",
+      "selector": "[data-testid=\"sidebar-item\"][aria-current=\"true\"]",
+      "property": "background-color",
+      "expected": "rgb(46, 92, 154)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C03",
+      "title": "Sidebar item hover transition duration and easing",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"sidebar-item\"]:first-child",
+        "wait 200"
+      ],
+      "criteria": "sidebar item background transition completes within 130-170ms",
+      "selector": "[data-testid=\"sidebar-item\"]:first-child",
+      "property": "background-color",
+      "expected": "rgb(46, 92, 154)",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C04",
+      "title": "Message hover actions appear on hover",
+      "kind": "dom",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"message\"]:first-child",
+        "wait 150"
+      ],
+      "criteria": "message-hover-actions is visible after hovering a message",
+      "selector": "[data-testid=\"message\"]:first-child [data-testid=\"message-hover-actions\"]",
+      "property": "visibility",
+      "expected": "visible",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C05",
+      "title": "Message hover actions fade-in duration",
+      "kind": "timing",
+      "steps": [
+        "goto /",
+        "hover [data-testid=\"message\"]:first-child",
+        "wait 130"
+      ],
+      "criteria": "message-hover-actions opacity transitions from 0 to 1 within 100-140ms",
+      "selector": "[data-testid=\"message\"]:first-child [data-testid=\"message-hover-actions\"]",
+      "property": "opacity",
+      "expected": "1",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C06",
+      "title": "Compose box present with correct styling",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "compose-box exists with border-radius 8px and border color #CCD6DD",
+      "selector": "[data-testid=\"compose-box\"]",
+      "property": "border-radius",
+      "expected": "8px",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C07",
+      "title": "Unread indicator dot present on Activity item",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "unread-indicator is visible on the Activity sidebar item",
+      "selector": "[data-testid=\"sidebar-item\"]:contains('Activity') [data-testid=\"unread-indicator\"]",
+      "property": "visibility",
+      "expected": "visible",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C08",
+      "title": "Channel list contains expected channels",
+      "kind": "dom",
+      "steps": [
+        "goto /"
+      ],
+      "criteria": "channel-list contains sales-support, enablement, pipeline-planning, general, announcements",
+      "selector": "[data-testid=\"channel-list\"]",
+      "property": "textContent",
+      "expected": "sales-support enablement pipeline-planning general announcements",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C09",
+      "title": "No console errors on page load",
+      "kind": "code",
+      "steps": [
+        "goto /",
+        "wait 500"
+      ],
+      "criteria": "no console error messages",
+      "selector": null,
+      "property": null,
+      "expected": "no console errors",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    },
+    {
+      "id": "C10",
+      "title": "Overall visual match to reference screenshot",
+      "kind": "visual",
+      "steps": [
+        "goto /",
+        "wait 300"
+      ],
+      "criteria": "Layout, colors, spacing, and motion feel match the Slack reference screenshot (sidebar, channel list, messages, compose box)",
+      "selector": null,
+      "property": null,
+      "expected": "score >= 0.7",
+      "op": null,
+      "shapes": null,
+      "dtype": null,
+      "metric": null,
+      "url": null,
+      "method": null,
+      "threshold": 0.7,
+      "weight": 1.0
+    }
+  ],
+  "environment": {
+    "needs_browser": true,
+    "needs_desktop": false,
+    "needs_macos": false,
+    "needs_gpu": false,
+    "packages": [],
+    "secrets": [
+      "CRUSOE_API_KEY",
+      "NTFY_TOPIC"
+    ],
+    "devices": [
+      "sandbox-desktop"
+    ],
+    "rationale": "A headless Chromium browser in a Linux VM is needed to render the static page and verify DOM styles, transitions, and visual match. No GPU, desktop, or macOS is required. CRUSOE_API_KEY and NTFY_TOPIC are always present but not strictly needed for this static page goal."
+  },
+  "design_facts": [
+    "Sidebar background: #4C337C (purple). Active channel item background: #2E5C9A (blue). Sidebar width: 280px. Sidebar item height: 44px, hover transition 150ms ease-out. Message hover actions fade in 120ms ease-out on message hover. Compose box: rounded rectangle with light gray border, send button and attachment button. Font: system-ui / -apple-system / BlinkMacSystemFont / 'Segoe UI' / Roboto. Unread indicator: small dot, active channel has blue left border. Channel list items: # sales-support (active), enablement, pipeline-planning, general, announcements."
+  ]
+}
