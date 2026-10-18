@@ -9,6 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parent
@@ -45,8 +46,13 @@ class RunResp(BaseModel):
     environment_plan: list[Provisioned]
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def index():
+    return FileResponse(ROOT / "web" / "index.html", media_type="text/html")
+
+
+@app.get("/api")
+def api_info():
     return {
         "name": "donedone",
         "about": "Turns a one-line goal into machine-verifiable checks, provisions a Vercel Sandbox with headless "
