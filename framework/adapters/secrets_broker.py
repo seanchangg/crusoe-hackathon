@@ -75,22 +75,27 @@ def mask(value: str, *, is_key: bool = False) -> str:
 class SecretsBrokerAdapter:
     name = "secrets_broker"
 
-    def __init__(self, vault: Mapping[str, str] | None = None, root: Path | None = None):
+    def __init__(self, vault: Mapping[str, str] | None = None, root: Path | None = None,
+                 request_keys: set[str] | None = None):
         self.vault = vault if vault is not None else os.environ
         self.root = root or ROOT
+        # names whose value came from the /run request's vault (browser credential manager) rather than env
+        self.request_keys = set(request_keys or ())
 
     def wanted(self, env: Environment) -> bool:
         return bool(env.secrets)
 
     # ------------------------------------------------------------ helpers ------
 
-    def _env_source(self) -> str:
+    def _env_source(self, name: str | None = None) -> str:
+        if name and name in self.request_keys:
+            return "request"
         return "vercel-env" if self.vault.get("VERCEL") == "1" else "local-env"
 
     def _team_id(self) -> tuple[str, str] | None:
         tid = self.vault.get("VERCEL_TEAM_ID")
         if tid:
-            return tid, self._env_source()
+            return tid, self._env_source("VERCEL_TEAM_ID")
         pj = self.root / ".vercel" / "project.json"
         try:
             tid = json.loads(pj.read_text()).get("orgId") or ""
@@ -99,6 +104,10 @@ class SecretsBrokerAdapter:
         return (tid, "file") if tid else None
 
     def _lambda_key(self) -> tuple[bytes, str] | None:
+        raw = self.vault.get("LAMBDA_SSH_KEY")  # the key itself, pasted into the credential manager
+        if raw and "PRIVATE KEY" in raw:
+            data = raw.replace("\r\n", "\n").encode()
+            return (data if data.endswith(b"\n") else data + b"\n"), self._env_source("LAMBDA_SSH_KEY")
         path = self.vault.get("LAMBDA_SSH_KEY_PATH")
         if path:
             p = Path(path).expanduser()
@@ -110,7 +119,7 @@ class SecretsBrokerAdapter:
                 data = base64.b64decode(b64)
             except Exception:
                 return None
-            return (data if data.endswith(b"\n") else data + b"\n"), self._env_source()
+            return (data if data.endswith(b"\n") else data + b"\n"), self._env_source("LAMBDA_SSH_KEY_B64")
         return None
 
     # ------------------------------------------------------------ resolve ------
@@ -144,7 +153,7 @@ class SecretsBrokerAdapter:
                     creds["GPU_HOST"] = host
                 creds["GPU_USER"] = self.vault.get("LAMBDA_USER") or creds.get("GPU_USER") or "ubuntu"
                 if host:
-                    row("GPU_HOST", host, self._env_source(), meta_name=name)
+                    row("GPU_HOST", host, self._env_source("LAMBDA_HOST"), meta_name=name)
                 elif self.vault.get("LAMBDA_API_KEY"):
                     # No host yet: the lambda_gpu adapter boots/resolves the box via the Lambda API next.
                     ledger.append({"name": "GPU_HOST", "status": "pending", "source": "lambda-api",
@@ -157,7 +166,7 @@ class SecretsBrokerAdapter:
             value = preset or self.vault.get(name)
             if value:
                 creds[name] = value
-            source = "request" if preset and preset != self.vault.get(name) else self._env_source()
+            source = "request" if preset and preset != self.vault.get(name) else self._env_source(name)
             row(name, value, source)
             if name == "VERCEL_TOKEN":
                 tid = self._team_id()

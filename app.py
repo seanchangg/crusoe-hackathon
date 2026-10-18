@@ -37,6 +37,17 @@ class PlanReq(BaseModel):
 class RunReq(BaseModel):
     spec: Spec
     ntfy_topic: str | None = None
+    vault: dict[str, str] | None = None  # browser credential manager: request-scoped secrets/device config
+
+
+class VaultReq(BaseModel):
+    vault: dict[str, str] | None = None
+    secrets: list[str] | None = None
+
+
+class DeviceTestReq(BaseModel):
+    type: str
+    config: dict[str, str | bool] = {}
 
 
 class RunResp(BaseModel):
@@ -86,7 +97,8 @@ async def run(req: RunReq):
     job_id = secrets.token_hex(4)
     creds = {"CRUSOE_API_KEY": os.environ.get("CRUSOE_API_KEY", ""),
              "NTFY_TOPIC": req.ntfy_topic or os.environ.get("NTFY_TOPIC", "")}
-    results = await provisioner.provision(req.spec, job_id, creds)
+    overrides = {k: str(v) for k, v in (req.vault or {}).items() if v}
+    results = await provisioner.provision(req.spec, job_id, creds, overrides=overrides)
     live = next((p.live_url for p in results if p.live_url), None)
     return RunResp(job_id=job_id, sandbox_name=vs.sandbox_name(job_id), live_url=live, environment_plan=results)
 
@@ -107,3 +119,33 @@ async def job(job_id: str):
 @app.post("/jobs/{job_id}/stop")
 async def stop_job(job_id: str):
     return {"job_id": job_id, "stopped": await vs.stop(job_id)}
+
+
+# ------------------------------------------------------------ credential manager ------
+from framework import devices as _devices  # noqa: E402
+from framework.adapters.secrets_broker import SecretsBrokerAdapter  # noqa: E402
+
+
+@app.get("/catalog")
+def catalog():
+    return {"secrets": _devices.secret_catalog(), "devices": _devices.DEVICE_TYPES}
+
+
+@app.post("/secrets/resolve")
+def secrets_resolve(req: VaultReq):
+    """Dry-run the broker: which secrets the server env already has, which the browser vault supplies, which are missing.
+    Returns masked forms only."""
+    ov = {k: str(v) for k, v in (req.vault or {}).items() if v}
+    names = list(req.secrets or [c["name"] for c in _devices.secret_catalog()])
+    names += [k for k in ov if k not in names]  # custom secrets from the browser vault
+    broker = SecretsBrokerAdapter(vault={**os.environ, **ov}, request_keys=set(ov))
+    creds: dict[str, str] = {}
+    ledger = broker.resolve(names, creds)
+    return {"ledger": ledger}
+
+
+@app.post("/devices/test")
+async def devices_test(req: DeviceTestReq):
+    cfg = {k: (v if isinstance(v, str) else ("1" if v else "")) for k, v in req.config.items()}
+    return await run_in_threadpool(_devices.test_device, req.type, cfg)
+

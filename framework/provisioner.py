@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
+from collections.abc import Mapping
 
 from .adapters import (LambdaGPUAdapter, MacOSAdapter, RemoteDesktopAdapter, SecretsBrokerAdapter,
                        VercelSandboxAdapter)
@@ -10,15 +12,17 @@ from .adapters.base import Provisioned
 from .spec import Environment, Spec
 
 
-def select_adapters(env: Environment) -> list:
+def select_adapters(env: Environment, overrides: Mapping[str, str] | None = None) -> list:
     """Vercel Sandbox is always the compute host (and the browser); mocks join when the env demands them.
 
     secrets_broker goes FIRST: it resolves every secret in env.secrets from the vault and writes it into creds.
     lambda_gpu next: it resolves the GPU box (reusing the broker's GPU_* if present) and writes GPU_* into creds.
     The sandbox adapter then injects every key in creds into the runner's environment."""
-    adapters: list = [SecretsBrokerAdapter()] if env.secrets else []
+    ov = {k: v for k, v in (overrides or {}).items() if v}
+    vault = {**os.environ, **ov}  # request-scoped: the process environment is never mutated
+    adapters: list = [SecretsBrokerAdapter(vault=vault, request_keys=set(ov))] if env.secrets else []
     if env.needs_gpu:
-        adapters.append(LambdaGPUAdapter())
+        adapters.append(LambdaGPUAdapter(env=vault))
     adapters.append(VercelSandboxAdapter())
     if env.needs_browser or env.needs_desktop:
         adapters.append(RemoteDesktopAdapter())  # real: desktop stack lives inside the sandbox
@@ -27,8 +31,9 @@ def select_adapters(env: Environment) -> list:
     return adapters
 
 
-async def provision(spec: Spec, job_id: str, creds: dict[str, str], adapters: list | None = None) -> list[Provisioned]:
-    adapters = adapters if adapters is not None else select_adapters(spec.environment)
+async def provision(spec: Spec, job_id: str, creds: dict[str, str], adapters: list | None = None,
+                    overrides: Mapping[str, str] | None = None) -> list[Provisioned]:
+    adapters = adapters if adapters is not None else select_adapters(spec.environment, overrides)
     # Sequential on purpose: the broker fills creds first, lambda_gpu fills GPU_* creds before the sandbox starts the runner, and the desktop
     # adapter reads the sandbox the sandbox adapter just created.
     return [await a.provision(spec, job_id, creds) for a in adapters]

@@ -260,6 +260,36 @@ textarea.goal:focus,.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px v
   .ledger td{border:0;padding:0}
   .ledger td.uf{flex-basis:100%}
 }
+
+/* credential & device manager */
+.vault .sub{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.devs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.dev{border:1px solid var(--line);background:var(--bg);padding:9px 10px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.dev h4{margin:0;font-size:.86rem;font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dev .meta{font-family:var(--mono);font-size:.66rem;color:var(--muted);overflow-wrap:anywhere}
+.dev .acts{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.dev.add{border-style:dashed;justify-content:center;align-items:center;cursor:pointer;color:var(--accent);font-family:var(--mono);font-size:.78rem;min-height:84px}
+.dev.add:hover{background:var(--panel)}
+.form{border:1px solid var(--accent);background:var(--bg);padding:10px;margin-top:8px;display:grid;gap:8px}
+.form label{display:grid;gap:3px;font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.form .inp,.form textarea{width:100%;box-sizing:border-box}
+.form textarea{font-family:var(--mono);font-size:.7rem;min-height:92px;border:1px solid var(--line2);background:var(--bg);color:var(--fg);padding:.4rem .5rem}
+.form .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sect{width:100%;border-collapse:collapse;font-size:.78rem}
+.sect th{text-align:left;font-family:var(--mono);font-weight:500;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 8px 4px 0}
+.sect td{padding:5px 8px 5px 0;border-bottom:1px dashed var(--line);vertical-align:top}
+.sect td.m{font-family:var(--mono);font-size:.7rem}
+.sect .uf{color:var(--muted);font-size:.72rem}
+.p-request{background:var(--vl-soft,rgba(120,80,200,.12));color:var(--vl)}
+.p-env{background:var(--ok-soft,rgba(15,110,86,.12));color:var(--accent)}
+.p-missing{background:var(--bad-soft,rgba(179,38,30,.12));color:var(--bad,#b3261e)}
+.p-ok{background:var(--ok-soft,rgba(15,110,86,.12));color:var(--accent)}
+.p-fail{background:var(--bad-soft,rgba(179,38,30,.12));color:var(--bad,#b3261e)}
+.p-untested{border:1px solid var(--line2);color:var(--muted)}
+.lock{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-family:var(--mono);font-size:.72rem;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.lock .inp{width:18ch}
+.note{font-size:.76rem;color:var(--muted);margin:6px 0 0}
+.vsum{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin:6px 0 0;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -339,9 +369,36 @@ textarea.goal:focus,.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px v
     <div class="cb" id="jobBody"></div>
   </section>
 
+  <section class="card vault" id="vaultCard" hidden>
+    <div class="ch"><span class="n on">⚿</span><b>Credentials &amp; devices</b><span class="sp"></span><span>stored in this browser · sent with each run · the server keeps nothing</span></div>
+    <div class="cb">
+      <div class="sub">Devices</div>
+      <div class="devs" id="devs"></div>
+      <div id="devForm"></div>
+      <div class="sub">Secrets</div>
+      <div style="overflow-x:auto"><table class="sect"><thead><tr><th>name</th><th>used for</th><th>source</th><th>value</th><th></th></tr></thead><tbody id="secRows"></tbody></table></div>
+      <div class="form" id="secForm" hidden></div>
+      <div class="row" style="margin-top:8px"><button class="btn sm ghost" id="secAdd" type="button">+ add secret</button></div>
+      <p class="note">Source <b>server</b> means the deployed function already has it in its environment. <b>browser</b> means it comes from this page and is sent only with your runs. Values are never shown back; only masked forms.</p>
+      <div class="lock">
+        <label>remember on this device <input type="checkbox" id="vaultRemember"></label>
+        <input class="inp" id="vaultPass" type="password" placeholder="passphrase" autocomplete="new-password">
+        <button class="btn sm" id="vaultSave" type="button">Save encrypted</button>
+        <button class="btn sm ghost" id="vaultForget" type="button">Forget everything</button>
+        <span id="vaultLock" class="mono"></span>
+      </div>
+    </div>
+  </section>
 </main>
 
 <aside class="side">
+  <section class="card">
+    <div class="ch"><b>Credentials &amp; devices</b></div>
+    <div class="cb">
+      <div class="vsum" id="vaultSum">loading…</div>
+      <button class="btn sm" id="vaultOpen" type="button" style="margin-top:8px">Manage</button>
+    </div>
+  </section>
   <section class="card">
     <div class="ch"><b>Recent jobs</b></div>
     <ul class="recent" id="recent"></ul>
@@ -581,6 +638,7 @@ function doRun(){
   if(!$("rawView").hidden){errorBox($("runErr"),"Apply or cancel your raw JSON edits first.");return}
   if(!S.spec.checks.length){errorBox($("runErr"),"The spec has no checks left.");return}
   var body={spec:S.spec},topic=$("ntfy").value.trim();if(topic)body.ntfy_topic=topic;
+  var venv=vaultEnv();if(Object.keys(venv).length)body.vault=venv;
   $("runBtn").disabled=true;$("runBusy").hidden=false;
   var stop=timer($("runTimer"));
   api("POST","/run",body).then(function(res){
@@ -780,6 +838,143 @@ window.addEventListener("hashchange",function(){var id=hashJob();if(id&&id!==S.j
 try{var q=new URLSearchParams(location.search);if(q.get("ntfy"))$("ntfy").value=q.get("ntfy");if(q.get("goal"))$("goal").value=q.get("goal")}catch(e){}
 renderRecent();
 var hj=hashJob();if(hj)monitor(hj);
+/* ---------- credential & device manager (client-side vault) ---------- */
+var V={devices:[],secrets:{}},CAT=null,VLOCKED=false,resolveT=null;
+function vaultEnv(){
+  var env={};
+  V.devices.forEach(function(d){var dt=devType(d.type);if(!dt)return;dt.fields.forEach(function(f){var v=d.config[f.name];if(f.kind==="bool")v=v?"1":"";if(v)env[f.env]=String(v)})});
+  Object.keys(V.secrets).forEach(function(k){if(V.secrets[k])env[k]=V.secrets[k]});
+  return env;
+}
+function devType(t){return CAT?CAT.devices.filter(function(d){return d.type===t})[0]:null}
+function renderDevs(){
+  var host=$("devs");clear(host);
+  V.devices.forEach(function(d,i){
+    var dt=devType(d.type)||{title:d.type,real:true};
+    var card=el("div",{cls:"dev"});
+    card.appendChild(el("h4",{},el("span",{text:d.name||dt.title}),pill(dt.real?"real":"sim",dt.real?"REAL":"SIMULATED"),
+      pill(d.test?(d.test.ok?"ok":"fail"):"untested",d.test?(d.test.ok?"ok":"failed"):"untested")));
+    var meta=Object.keys(d.config).filter(function(k){var f=(dt.fields||[]).filter(function(x){return x.name===k})[0];return f&&f.kind!=="key"&&f.kind!=="token"&&d.config[k]}).map(function(k){return k+"="+d.config[k]}).join(" · ");
+    card.appendChild(el("div",{cls:"meta",text:dt.about||""}));
+    if(meta)card.appendChild(el("div",{cls:"meta",text:meta}));
+    if(d.test)card.appendChild(el("div",{cls:"meta",text:d.test.detail+" · "+d.test.latency_ms+" ms"}));
+    var acts=el("div",{cls:"acts"});
+    acts.appendChild(el("button",{cls:"btn sm",type:"button",text:"Test",onclick:function(){testDev(i)}}));
+    if((dt.fields||[]).length)acts.appendChild(el("button",{cls:"btn sm ghost",type:"button",text:"Edit",onclick:function(){devForm(d.type,i)}}));
+    if(d.type!=="sandbox-desktop")acts.appendChild(el("button",{cls:"btn sm ghost",type:"button",text:"Remove",onclick:function(){V.devices.splice(i,1);vaultChanged()}}));
+    card.appendChild(acts);host.appendChild(card);
+  });
+  var add=el("div",{cls:"dev add",text:"+ add device",onclick:function(){devForm(null,-1)}});host.appendChild(add);
+}
+function devForm(type,idx){
+  var host=$("devForm");clear(host);
+  var f=el("div",{cls:"form"});
+  var sel=el("select",{cls:"inp"});
+  CAT.devices.forEach(function(d){var o=el("option",{value:d.type,text:d.title+(d.real?"":" (simulated)")});if(d.type===type)o.selected=true;sel.appendChild(o)});
+  if(idx<0){f.appendChild(el("label",{text:"device type"},sel));type=type||CAT.devices[1].type;sel.value=type;sel.addEventListener("change",function(){devForm(sel.value,-1)})}
+  var dt=devType(type),cur=idx>=0?V.devices[idx]:{name:"",config:{}};
+  var nameIn=el("input",{cls:"inp",value:cur.name||"",placeholder:dt.title});
+  f.appendChild(el("label",{text:"name"},nameIn));
+  var inputs={};
+  dt.fields.forEach(function(fd){
+    var inp;
+    if(fd.kind==="key"){inp=el("textarea",{placeholder:"-----BEGIN OPENSSH PRIVATE KEY----- …",spellcheck:"false"});inp.value=cur.config[fd.name]||"";
+      var file=el("input",{type:"file"});file.addEventListener("change",function(){var r=new FileReader();r.onload=function(){inp.value=r.result};if(file.files[0])r.readAsText(file.files[0])});
+      f.appendChild(el("label",{text:fd.label+(fd.required?" *":"")},inp,file));}
+    else if(fd.kind==="bool"){inp=el("input",{type:"checkbox"});inp.checked=!!cur.config[fd.name];f.appendChild(el("label",{text:fd.label},inp))}
+    else{inp=el("input",{cls:"inp",type:fd.kind==="token"?"password":"text",autocomplete:"off",value:cur.config[fd.name]||""});f.appendChild(el("label",{text:fd.label+(fd.required?" *":"")},inp))}
+    inputs[fd.name]=inp;
+  });
+  if(!dt.fields.length)f.appendChild(el("p",{cls:"note",text:dt.about}));
+  var row=el("div",{cls:"row"});
+  row.appendChild(el("button",{cls:"btn sm",type:"button",text:idx>=0?"Save":"Add",onclick:function(){
+    var cfg={};dt.fields.forEach(function(fd){var inp=inputs[fd.name];cfg[fd.name]=fd.kind==="bool"?inp.checked:inp.value.trim()});
+    var missing=dt.fields.filter(function(fd){return fd.required&&!cfg[fd.name]});
+    if(missing.length){errorBox(host,"Missing: "+missing.map(function(m){return m.label}).join(", "));host.insertBefore(f,host.firstChild);return}
+    var d={id:cur.id||Math.random().toString(36).slice(2,8),type:type,name:nameIn.value.trim()||dt.title,config:cfg,test:null};
+    if(idx>=0)V.devices[idx]=d;else V.devices.push(d);
+    clear(host);vaultChanged();
+  }}));
+  row.appendChild(el("button",{cls:"btn sm ghost",type:"button",text:"Cancel",onclick:function(){clear(host)}}));
+  f.appendChild(row);host.appendChild(f);
+}
+function testDev(i){
+  var d=V.devices[i];d.test={ok:false,detail:"testing…",latency_ms:0};renderDevs();
+  var cfg={};Object.keys(d.config).forEach(function(k){cfg[k]=d.config[k]});
+  api("POST","/devices/test",{type:d.type,config:cfg}).then(function(r){d.test=r}).catch(function(e){d.test={ok:false,detail:"test failed: "+(e.detail||""),latency_ms:0}}).then(renderDevs);
+}
+function renderSecrets(ledger){
+  var tb=$("secRows");clear(tb);
+  var byName={};(ledger||[]).forEach(function(r){byName[r.name]=r});
+  var names=CAT.secrets.map(function(c){return c.name});
+  Object.keys(V.secrets).forEach(function(k){if(names.indexOf(k)<0)names.push(k)});
+  names.forEach(function(n){
+    var c=CAT.secrets.filter(function(x){return x.name===n})[0]||{used_for:"custom",kind:"token"};
+    var r=byName[n],src=r&&r.status==="injected"?(r.source==="request"?"browser":"server"):(r&&r.status==="pending"?"pending":"missing");
+    var tr=el("tr");
+    tr.appendChild(el("td",{cls:"m",text:n}));
+    tr.appendChild(el("td",{cls:"uf",text:c.used_for}));
+    tr.appendChild(el("td",{},pill(src==="browser"?"request":src==="server"?"env":src==="pending"?"untested":"missing",src)));
+    tr.appendChild(el("td",{cls:"m",text:V.secrets[n]?"set here · "+maskv(V.secrets[n]):(r&&r.masked)||""}));
+    var acts=el("td",{});
+    acts.appendChild(el("button",{cls:"btn sm ghost",type:"button",text:V.secrets[n]?"Change":"Set",onclick:function(){secForm(n,c.kind)}}));
+    if(V.secrets[n])acts.appendChild(el("button",{cls:"btn sm ghost",type:"button",text:"Clear",onclick:function(){delete V.secrets[n];vaultChanged()}}));
+    tr.appendChild(acts);tb.appendChild(tr);
+  });
+}
+function maskv(v){return v.length>=12?v.slice(0,4)+"…"+v.slice(-4):v.slice(0,2)+"…("+v.length+" chars)"}
+function secForm(name,kind){
+  var host=$("secForm");clear(host);host.hidden=false;
+  var nameIn=el("input",{cls:"inp",value:name||"",placeholder:"NAME",autocomplete:"off"});if(name)nameIn.disabled=true;
+  var val=kind==="key"?el("textarea",{spellcheck:"false"}):el("input",{cls:"inp",type:"password",autocomplete:"new-password"});
+  host.appendChild(el("label",{text:"name"},nameIn));host.appendChild(el("label",{text:"value (kept in this browser only)"},val));
+  var row=el("div",{cls:"row"});
+  row.appendChild(el("button",{cls:"btn sm",type:"button",text:"Save",onclick:function(){var n=nameIn.value.trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_");if(!n||!val.value.trim())return;V.secrets[n]=val.value.trim();clear(host);host.hidden=true;vaultChanged()}}));
+  row.appendChild(el("button",{cls:"btn sm ghost",type:"button",text:"Cancel",onclick:function(){clear(host);host.hidden=true}}));
+  host.appendChild(row);
+}
+function vaultChanged(){
+  renderDevs();
+  clearTimeout(resolveT);resolveT=setTimeout(resolveVault,250);
+  if($("vaultRemember").checked&&$("vaultPass").value)saveVault();
+}
+function resolveVault(){
+  api("POST","/secrets/resolve",{vault:vaultEnv()}).then(function(r){renderSecrets(r.ledger);summarize(r.ledger)}).catch(function(e){renderSecrets([]);$("vaultSum").textContent="resolve failed: "+(e.detail||"")});
+}
+function summarize(ledger){
+  var inj=(ledger||[]).filter(function(r){return r.status==="injected"}),br=inj.filter(function(r){return r.source==="request"}).length;
+  $("vaultSum").textContent=V.devices.length+" device(s) · "+inj.length+" secret(s) available ("+br+" from this browser, "+(inj.length-br)+" on the server)"+(VLOCKED?" · locked":"");
+}
+/* encrypted persistence: PBKDF2 -> AES-GCM, only when the user opts in */
+function kdf(pass,salt){return crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]).then(function(k){return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:200000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])})}
+function b64(a){return btoa(String.fromCharCode.apply(null,new Uint8Array(a)))}function unb64(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0)})}
+function saveVault(){
+  var pass=$("vaultPass").value;if(!pass){$("vaultLock").textContent="enter a passphrase first";return}
+  var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  kdf(pass,salt).then(function(key){return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,new TextEncoder().encode(JSON.stringify({devices:V.devices,secrets:V.secrets})))})
+  .then(function(ct){store("donedone.vault",{salt:b64(salt),iv:b64(iv),ct:b64(ct)});$("vaultLock").textContent="saved, encrypted in this browser"}).catch(function(){$("vaultLock").textContent="encryption unavailable in this context"});
+}
+function unlockVault(){
+  var blob=store("donedone.vault"),pass=$("vaultPass").value;if(!blob||!pass)return;
+  kdf(pass,unb64(blob.salt)).then(function(key){return crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(blob.iv)},key,unb64(blob.ct))})
+  .then(function(pt){var d=JSON.parse(new TextDecoder().decode(pt));V.devices=d.devices||[];V.secrets=d.secrets||{};VLOCKED=false;$("vaultRemember").checked=true;$("vaultLock").textContent="unlocked";vaultChanged()})
+  .catch(function(){$("vaultLock").textContent="wrong passphrase"});
+}
+function initVault(){
+  api("GET","/catalog").then(function(c){
+    CAT=c;
+    if(!V.devices.length)V.devices.push({id:"builtin",type:"sandbox-desktop",name:"Linux microVM + desktop",config:{},test:{ok:true,detail:"built in",latency_ms:0}});
+    var blob=store("donedone.vault");
+    if(blob){VLOCKED=true;$("vaultLock").textContent="an encrypted vault is saved here: enter the passphrase and press Unlock";$("vaultSave").textContent="Unlock"}
+    vaultChanged();
+  }).catch(function(e){$("vaultSum").textContent="catalog unavailable"});
+}
+$("vaultOpen").addEventListener("click",function(){$("vaultCard").hidden=false;$("vaultCard").scrollIntoView({behavior:"smooth",block:"start"})});
+$("secAdd").addEventListener("click",function(){secForm("", "token")});
+$("vaultSave").addEventListener("click",function(){if(VLOCKED){unlockVault();$("vaultSave").textContent="Save encrypted"}else saveVault()});
+$("vaultRemember").addEventListener("change",function(){if(this.checked)saveVault()});
+$("vaultForget").addEventListener("click",function(){V={devices:[],secrets:{}};try{localStorage.removeItem("donedone.vault")}catch(e){}VLOCKED=false;$("vaultLock").textContent="forgotten";$("vaultSave").textContent="Save encrypted";initVault()});
+initVault();
 })();
 </script>
 </body>
